@@ -13,6 +13,8 @@ constexpr auto NEEDARG    = ':';
 int getopt(int argc, char* const argv[], const char* optstring)
 {
     static auto innerInd = 0;
+    const auto useNeedArgErrs = optstring[0] == NEEDARG;
+    const auto printErrs      = opterr && !useNeedArgErrs;
     if (innerInd == 0)
     {
         if (optind >= argc || argv[optind][0] != OPTCHAR || !argv[optind][1])
@@ -41,16 +43,22 @@ int getopt(int argc, char* const argv[], const char* optstring)
         {
             if (optind >= argc) // there is no argument
             {
-                std::cerr << argv[0] << ": option requires an argument -- '"
-                          << opt << "'\n";
-                return INVALIDOPT;
+                if (printErrs)
+                {
+                    std::cerr << argv[0] << ": option requires an argument -- '"
+                              << opt << "'\n";
+                }
+                return useNeedArgErrs ? NEEDARG : INVALIDOPT;
             }
             optarg = argv[optind++] + innerInd; // handles correctly both
             innerInd = 0;                       // '-oARG' and '-o ARG'
         }
         return opt;
     }
-    std::cerr << argv[0] << ": invalid option -- '" << opt << "'\n";
+    if (printErrs)
+    {
+        std::cerr << argv[0] << ": invalid option -- '" << opt << "'\n";
+    }
     return INVALIDOPT;
 }
 
@@ -58,5 +66,6 @@ char* optarg = nullptr;
 
 int optind = 1; // skip argv[0]
 int optopt = 0;
+int opterr = 1;
 
 } // inline namespace MyUtils

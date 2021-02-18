@@ -10,3 +10,9 @@ target_include_directories(ch2-getopt INTERFACE .)
 
 add_executable(ch2-getopt-test1 test1.cpp)
 target_link_libraries(ch2-getopt-test1 PRIVATE ch2-getopt)
+
+add_executable(ch2-getopt-test2 test2.cpp)
+target_link_libraries(ch2-getopt-test2 PRIVATE ch2-getopt)
+
+add_executable(ch2-getopt-test3 test3.cpp)
+target_link_libraries(ch2-getopt-test3 PRIVATE ch2-getopt)

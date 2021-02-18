@@ -9,5 +9,6 @@ extern char* optarg;
 
 extern int optind;
 extern int optopt;
+extern int opterr;
 
 } // inline namespace MyUtils
