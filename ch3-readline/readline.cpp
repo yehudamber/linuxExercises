@@ -4,11 +4,19 @@
 #include <cerrno>
 #include <system_error>
 
+constexpr auto initialBufLen = 80;
+
 int Line::read()
 {
     if (!m_fp)
     {
         return -1;
+    }
+
+    if (!m_buf)
+    {
+        m_buflen = initialBufLen;
+        m_buf = std::make_unique<char[]>(m_buflen);
     }
 
     std::size_t len = 0;
