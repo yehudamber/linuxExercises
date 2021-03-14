@@ -13,6 +13,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+using namespace std::string_view_literals;
+
 std::string_view progName;
 
 class File
@@ -28,12 +30,17 @@ public:
         }
     }
 
+    explicit File(int fd, const std::string_view& path)
+        : m_path(path), m_fd(fd), m_needToClose(false)
+    {
+    }
+
     File(File&&)            = delete; // this will delete the copy constructor
     File& operator=(File&&) = delete; //    and assignment operator
 
     ~File()
     {
-        if (::close(m_fd) < 0)
+        if (m_needToClose && ::close(m_fd) < 0)
         {
             // cannot throw an exception from a destructor
             std::cerr << progName << ": failed to close " << m_path << ": "
@@ -67,6 +74,7 @@ public:
 private:
     std::string m_path;
     int m_fd;
+    bool m_needToClose = true;
 };
 
 constexpr auto openSrcFile  = O_RDONLY;
@@ -74,6 +82,8 @@ constexpr auto openDestFile = O_WRONLY | O_TRUNC | O_CREAT;
 constexpr auto destFileMode = S_IRUSR | S_IWUSR
                             | S_IRGRP | S_IWGRP
                             | S_IROTH | S_IWOTH; // 0666
+
+constexpr auto stdStreamPath = "-"sv;
 
 int main(int argc, char* argv[])
 {
@@ -87,8 +97,14 @@ int main(int argc, char* argv[])
 
     try
     {
-        auto srcFile  = File(argv[1], openSrcFile);
-        auto destFile = File(argv[2], openDestFile, destFileMode);
+        auto srcPath  = std::string_view(argv[1]);
+        auto destPath = std::string_view(argv[2]);
+        auto srcFile  = srcPath == stdStreamPath
+                            ? File(STDIN_FILENO, "<stdin>"sv)
+                            : File(srcPath, openSrcFile);
+        auto destFile = destPath == stdStreamPath
+                            ? File(STDOUT_FILENO, "<stdout>"sv)
+                            : File(destPath, openDestFile, destFileMode);
 
         auto buf = std::array<std::byte, BUFSIZ>();
         while (auto count = srcFile.read(buf))
