@@ -85,7 +85,7 @@ constexpr auto destFileMode = S_IRUSR | S_IWUSR
 
 constexpr auto stdStreamPath = "-"sv;
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) try
 {
     progName = argv[0];
 
@@ -95,26 +95,28 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    try
-    {
-        auto srcPath  = std::string_view(argv[1]);
-        auto destPath = std::string_view(argv[2]);
-        auto srcFile  = srcPath == stdStreamPath
-                            ? File(STDIN_FILENO, "<stdin>"sv)
-                            : File(srcPath, openSrcFile);
-        auto destFile = destPath == stdStreamPath
-                            ? File(STDOUT_FILENO, "<stdout>"sv)
-                            : File(destPath, openDestFile, destFileMode);
+    auto srcPath  = std::string_view(argv[1]);
+    auto destPath = std::string_view(argv[2]);
+    auto srcFile  = srcPath == stdStreamPath
+                        ? File(STDIN_FILENO, "<stdin>"sv)
+                        : File(srcPath, openSrcFile);
+    auto destFile = destPath == stdStreamPath
+                        ? File(STDOUT_FILENO, "<stdout>"sv)
+                        : File(destPath, openDestFile, destFileMode);
 
-        auto buf = std::array<std::byte, BUFSIZ>();
-        while (auto count = srcFile.read(buf))
-        {
-            destFile.write({buf.data(), count});
-        }
-    }
-    catch (const std::exception& ex)
+    auto buf = std::array<std::byte, BUFSIZ>();
+    while (auto count = srcFile.read(buf))
     {
-        std::cerr << progName << ": " << ex.what() << '\n';
-        return EXIT_FAILURE;
+        destFile.write({buf.data(), count});
     }
+}
+catch (const std::exception& ex)
+{
+    std::cerr << progName << ": " << ex.what() << '\n';
+    return EXIT_FAILURE;
+}
+catch (...)
+{
+    std::cerr << progName << ": Unkonwn exception\n";
+    return EXIT_FAILURE;
 }
