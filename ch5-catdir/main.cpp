@@ -1,7 +1,3 @@
-/********************************
- * main.cpp - The main function *
- ********************************/
-
 #include "controller.h"
 
 #include <iostream>

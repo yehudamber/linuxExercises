@@ -1,7 +1,3 @@
-/*****************************************************
- * directory.cpp - Implementation of class Directory *
- *****************************************************/
-
 #include "directory.h"
 
 #include "controller.h"

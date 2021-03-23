@@ -1,7 +1,3 @@
-/***********************************************
- * directory.h - Definision of class Directory *
- ***********************************************/
-
 #pragma once
 
 #include <string>
