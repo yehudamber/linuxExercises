@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <iosfwd>
+#include <span>
 #include <string_view>
 
 /*
@@ -29,8 +30,7 @@ private:
     static Controller* m_instance; // static pointer to the created controller
 
     const std::string_view m_progName;
-    const int m_argc;
-    const char* const* const m_argv;
+    const std::span<const char* const> m_args;
     std::ostream& m_out;
     std::ostream& m_err;
     int m_exitStatus = EXIT_SUCCESS;

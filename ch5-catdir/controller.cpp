@@ -15,7 +15,7 @@ using namespace std::string_view_literals;
 Controller::Controller(
                 int argc, char* argv[], std::ostream& out, std::ostream& err)
     : // argv[0] is used only as the program name
-      m_progName(argv[0]), m_argc(argc - 1), m_argv(argv + 1),
+      m_progName(argv[0]), m_args(argv + 1, argc - 1),
       m_out(out), m_err(err)
 {
     m_instance = this; // assume that only one controller is
@@ -29,15 +29,15 @@ Controller::~Controller()
 
 int Controller::run()
 {
-    if (m_argc == 0)
+    if (m_args.empty())
     {
         process("."sv);
     }
     else
     {
-        for (auto i = 0; i < m_argc; ++i)
+        for (auto path : m_args)
         {
-            process(m_argv[i]);
+            process(path);
         }
     }
     return m_exitStatus;
