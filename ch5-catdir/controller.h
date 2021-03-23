@@ -1,7 +1,3 @@
-/*************************************************
- * controller.h - Definision of class Controller *
- *************************************************/
-
 #pragma once
 
 #include <cstdlib>
@@ -27,7 +23,8 @@ public:
 private:
     void process(const std::string_view& path);
 
-    static Controller* m_instance; // static pointer to the created controller
+    // static pointer to the created controller
+    static inline Controller* m_instance = nullptr;
 
     const std::string_view m_progName;
     const std::span<const char* const> m_args;

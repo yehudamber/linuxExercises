@@ -1,7 +1,3 @@
-/*******************************************************
- * controller.cpp - Implementation of class Controller *
- *******************************************************/
-
 #include "controller.h"
 
 #include "directory.h"
@@ -65,5 +61,3 @@ catch (...)
 {
     error() << "Unknown exception\n";
 }
-
-Controller* Controller::m_instance;
