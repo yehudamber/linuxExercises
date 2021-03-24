@@ -9,5 +9,6 @@ include(../cmake/warnings.cmake)
 
 add_executable(ch5-catdir main.cpp
                           controller.cpp
-                          directory.cpp)
+                          directory.cpp
+                          utils.cpp)
 set_project_warnings(ch5-catdir)
