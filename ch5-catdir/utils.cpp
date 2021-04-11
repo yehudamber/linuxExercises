@@ -29,7 +29,7 @@ void setAdditionalFlag(char& target, char flag)
 
 std::string fmtMode(mode_t mode)
 {
-    auto res = std::string(10, '-');
+    auto res = std::string(modeStringLen, '-');
     res[0] = typeChar(mode);
 
     if (mode & S_IRUSR) { res[1] = 'r'; }

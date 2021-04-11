@@ -48,18 +48,25 @@ std::ostream& Controller::error()
 
 void Controller::process(const std::string_view& path) try
 {
+    constexpr auto inodeFieldWidth     = 8;
+    constexpr auto linkCountFieldWidth = 3;
+    constexpr auto unknown             = "<?>";
+
     auto dir = Directory(path);
     while (auto ent = dir.next())
     {
         if (ent->m_extra)
         {
-            m_out << std::setw(8) << ent->m_extra->m_inode << ' '
+            m_out << std::setw(inodeFieldWidth) << ent->m_extra->m_inode << ' '
                   << fmtMode(ent->m_extra->m_mode) << ' '
-                  << std::setw(3) << ent->m_extra->m_linkCount << ' ';
+                  << std::setw(linkCountFieldWidth) << ent->m_extra->m_linkCount
+                  << ' ';
         }
         else
         {
-            m_out << "     <?>        <?> <?> ";
+            m_out << std::setw(inodeFieldWidth)     << unknown << ' '
+                  << std::setw(modeStringLen)       << unknown << ' '
+                  << std::setw(linkCountFieldWidth) << unknown << ' ';
         }
         m_out << ent->m_name << '\n';
     }
