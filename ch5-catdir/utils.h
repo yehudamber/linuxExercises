@@ -10,3 +10,5 @@
  */
 
 std::string fmtMode(mode_t);
+
+constexpr auto modeStringLen = 10; // the length of fmtMode's result

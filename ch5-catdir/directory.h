@@ -15,8 +15,15 @@ class Directory
 public:
     struct Entry
     {
-        ino_t m_inode;
         std::string m_name;
+
+        struct ExtraData
+        {
+            ino_t m_inode;
+            mode_t m_mode;
+            nlink_t m_linkCount;
+        };
+        std::optional<ExtraData> m_extra;
     };
 
     explicit Directory(const std::string_view& path);
@@ -26,6 +33,8 @@ public:
     std::optional<Entry> next(); // returns std::nullopt for end-of-directory
 
 private:
+    Entry entryFor(std::string name);
+
     std::string m_path;
     DIR* m_dir;
 };

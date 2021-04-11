@@ -1,6 +1,7 @@
 #include "controller.h"
 
 #include "directory.h"
+#include "utils.h"
 
 #include <exception>
 #include <iomanip>
@@ -47,10 +48,27 @@ std::ostream& Controller::error()
 
 void Controller::process(const std::string_view& path) try
 {
+    constexpr auto inodeFieldWidth     = 8;
+    constexpr auto linkCountFieldWidth = 3;
+    constexpr auto unknown             = "<?>";
+
     auto dir = Directory(path);
     while (auto ent = dir.next())
     {
-        m_out << std::setw(8) << ent->m_inode << ' ' << ent->m_name << '\n';
+        if (ent->m_extra)
+        {
+            m_out << std::setw(inodeFieldWidth) << ent->m_extra->m_inode << ' '
+                  << fmtMode(ent->m_extra->m_mode) << ' '
+                  << std::setw(linkCountFieldWidth) << ent->m_extra->m_linkCount
+                  << ' ';
+        }
+        else
+        {
+            m_out << std::setw(inodeFieldWidth)     << unknown << ' '
+                  << std::setw(modeStringLen)       << unknown << ' '
+                  << std::setw(linkCountFieldWidth) << unknown << ' ';
+        }
+        m_out << ent->m_name << '\n';
     }
 }
 catch (const std::exception& ex)
