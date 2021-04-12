@@ -56,10 +56,10 @@ namespace
  * readlink - reads the content of the symlink 'path', using initial buffer of
  *            size 'size'
  *
- * We can't rely on the size returned by lstat, because the link can increase
- * between tha calls, and because the kernel doesn't give a size for the
- * symlinks on pseudo-filesystems such as /proc, so we need to iterate until the
- * buffer fits the link content.
+ * We can't rely on the size returned by lstat, because the size of the link can
+ * increase between the calls, and because the kernel doesn't give a size for
+ * the symlinks on pseudo-filesystems such as /proc, so we need to iterate until
+ * the buffer fits the link content.
  *
  * The code main layout is based on the GNU coreutils v5.0 xreadlink function.
  */
