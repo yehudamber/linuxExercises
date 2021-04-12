@@ -68,7 +68,12 @@ void Controller::process(const std::string_view& path) try
                   << std::setw(modeStringLen)       << unknown << ' '
                   << std::setw(linkCountFieldWidth) << unknown << ' ';
         }
-        m_out << ent->m_name << '\n';
+        m_out << ent->m_name;
+        if (ent->m_linkTarget)
+        {
+            m_out << " -> " << *ent->m_linkTarget;
+        }
+        m_out << '\n';
     }
 }
 catch (const std::exception& ex)

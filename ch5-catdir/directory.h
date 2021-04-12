@@ -24,6 +24,7 @@ public:
             nlink_t m_linkCount;
         };
         std::optional<ExtraData> m_extra;
+        std::optional<std::string> m_linkTarget;
     };
 
     explicit Directory(const std::string_view& path);
