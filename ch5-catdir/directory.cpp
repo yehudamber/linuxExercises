@@ -75,7 +75,7 @@ std::optional<std::string> readlink(const std::string& path, off_t size)
     {
         res.resize(size + 1); // one additional character for the terminating
                               // null
-        if (auto readCount = ::readlink(path.c_str(), res.data(), size + 1);
+        if (auto readCount = ::readlink(path.c_str(), res.data(), res.size());
             readCount < 0)
         {
             auto savedErrno = errno;
