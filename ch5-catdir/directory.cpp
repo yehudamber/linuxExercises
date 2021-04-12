@@ -86,7 +86,7 @@ std::optional<std::string> readlink(const std::string& path, off_t size)
         }
         else if (readCount <= size)
         {
-            res.resize(readCount + 1);
+            res.resize(readCount);
             return res;
         }
         size *= 2;
