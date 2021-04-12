@@ -14,7 +14,8 @@ Directory::Directory(const std::string_view& path)
 {
     if (!m_dir)
     {
-        throw std::system_error(errno, std::generic_category(),
+        auto savedErrno = errno;
+        throw std::system_error(savedErrno, std::generic_category(),
                                 "failed to open " + m_path);
     }
 }
@@ -24,8 +25,10 @@ Directory::~Directory()
     if (::closedir(m_dir) < 0)
     {
         // cannot throw an exception from a destructor
+        auto savedErrno = errno;
         Controller::error() << "failed to close " << m_path << ": "
-                            << std::generic_category().message(errno) << '\n';
+                            << std::generic_category().message(savedErrno)
+                            << '\n';
     }
 }
 
@@ -40,7 +43,8 @@ std::optional<Directory::Entry> Directory::next()
     {
         return std::nullopt;
     }
-    throw std::system_error(errno, std::generic_category(),
+    auto savedErrno = errno;
+    throw std::system_error(savedErrno, std::generic_category(),
                             "failed to read entry from " + m_path);
 }
 
@@ -53,8 +57,10 @@ Directory::Entry Directory::entryFor(std::string name)
     struct stat data;
     if (::stat(path.c_str(), &data) < 0)
     {
+        auto savedErrno = errno;
         Controller::error() << "failed to stat " << path << ": "
-                            << std::generic_category().message(errno) << '\n';
+                            << std::generic_category().message(savedErrno)
+                            << '\n';
         return res;
     }
 
