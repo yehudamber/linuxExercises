@@ -73,8 +73,7 @@ std::optional<std::string> readlink(const std::string& path, off_t size)
     auto res = std::string();
     while (true)
     {
-        res.resize(size + 1); // one additional character for the terminating
-                              // null
+        res.resize(size + 1); // one additional character to detect overflow
         if (auto readCount = ::readlink(path.c_str(), res.data(), res.size());
             readCount < 0)
         {
