@@ -1,9 +1,20 @@
 #pragma once
 
-#include <cstdlib>
 #include <iosfwd>
 #include <span>
 #include <string_view>
+
+/*
+ * ExitStatus - constants for the exit status values returned by the program
+ */
+
+namespace ExitStatus
+{
+
+static constexpr auto SUCCESS = 0;
+static constexpr auto FAILURE = 1;
+
+}
 
 /*
  * Controller - the class that control the execution of the program
@@ -30,5 +41,5 @@ private:
     const std::span<const char* const> m_args;
     std::ostream& m_out;
     std::ostream& m_err;
-    int m_exitStatus = EXIT_SUCCESS;
+    int m_exitStatus = ExitStatus::SUCCESS;
 };

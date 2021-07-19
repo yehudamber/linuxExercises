@@ -42,7 +42,7 @@ int Controller::run()
 
 std::ostream& Controller::error()
 {
-    m_instance->m_exitStatus = EXIT_FAILURE;
+    m_instance->m_exitStatus = ExitStatus::FAILURE;
     return m_instance->m_err << m_instance->m_progName << ": ";
 }
 
