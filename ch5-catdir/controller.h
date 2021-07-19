@@ -11,8 +11,9 @@
 namespace ExitStatus
 {
 
-static constexpr auto SUCCESS = 0;
-static constexpr auto FAILURE = 1;
+static constexpr auto SUCCESS    = 0;
+static constexpr auto FAILURE    = 1;
+static constexpr auto CMDLINEERR = 2;
 
 }
 
@@ -37,8 +38,15 @@ private:
     // static pointer to the created controller
     static inline Controller* m_instance = nullptr;
 
-    const std::string_view m_progName;
-    const std::span<const char* const> m_args;
+    const struct Arguments
+    {
+        std::string_view m_progName;
+        std::span<const char* const> m_positional;
+        bool m_showHelp = false;
+        bool m_wasError = false;
+
+        explicit Arguments(int argc, char* argv[]);
+    } m_args;
     std::ostream& m_out;
     std::ostream& m_err;
     int m_exitStatus = ExitStatus::SUCCESS;
