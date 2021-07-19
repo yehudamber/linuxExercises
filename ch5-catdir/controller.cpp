@@ -35,12 +35,13 @@ int Controller::run()
 
     if (m_args.m_showHelp)
     {
-        m_err << "Usage: " << m_args.m_progName << " [-h] [DIRECTORY]...\n"
+        m_err << "Usage: " << m_args.m_progName << " [-hr] [DIRECTORY]...\n"
                  "Print the content of the DIRECTORY(ies).\n\n"
                  "With no DIRECTORY, use the current working directory.\n"
                  "Exit status is 0 for success, 1 for failure and 2 for"
                  " command-line error.\n\n"
-                 "  -h\tShow this help and exit\n";
+                 "  -h\tShow this help and exit\n"
+                 "  -r\tAlso print the content of subdirectories\n";
         return ExitStatus::SUCCESS;
     }
 
@@ -64,7 +65,7 @@ std::ostream& Controller::error()
     return m_instance->m_err << m_instance->m_args.m_progName << ": ";
 }
 
-void Controller::process(const std::string_view& path) try
+void Controller::process(const std::string_view& path, bool isArgument) try
 {
     constexpr auto inodeFieldWidth     = 8;
     constexpr auto linkCountFieldWidth = 3;
@@ -73,6 +74,10 @@ void Controller::process(const std::string_view& path) try
     auto dir = Directory(path);
     while (auto ent = dir.next())
     {
+        if (!isArgument)
+        {
+            m_out << '\t';
+        }
         if (ent->m_extra)
         {
             m_out << std::setw(inodeFieldWidth) << ent->m_extra->m_inode << ' '
@@ -92,6 +97,12 @@ void Controller::process(const std::string_view& path) try
             m_out << " -> " << *ent->m_linkTarget;
         }
         m_out << '\n';
+
+        if (isArgument && m_args.m_readSubdirs && ent->isSubdir()
+                && ent->m_name != "." && ent->m_name != "..")
+        {
+            process(std::string(path) + '/' + ent->m_name, false);
+        }
     }
 }
 catch (const std::exception& ex)
@@ -105,12 +116,15 @@ catch (...)
 
 Controller::Arguments::Arguments(int argc, char* argv[]) : m_progName(argv[0])
 {
-    for (int opt; (opt = ::getopt(argc, argv, "h")) != -1;)
+    for (int opt; (opt = ::getopt(argc, argv, "hr")) != -1;)
     {
         switch (opt)
         {
         case 'h':
             m_showHelp = true;
+            break;
+        case 'r':
+            m_readSubdirs = true;
             break;
         case '?':
             m_wasError = true;

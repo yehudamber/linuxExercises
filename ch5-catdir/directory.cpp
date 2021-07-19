@@ -10,6 +10,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+bool Directory::Entry::isSubdir() const
+{
+    return m_extra && S_ISDIR(m_extra->m_mode);
+}
+
 Directory::Directory(const std::string_view& path)
     : m_path(path), m_dir(::opendir(m_path.c_str()))
 {

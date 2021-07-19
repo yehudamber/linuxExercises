@@ -33,7 +33,7 @@ public:
     static std::ostream& error();
 
 private:
-    void process(const std::string_view& path);
+    void process(const std::string_view& path, bool isArgument = true);
 
     // static pointer to the created controller
     static inline Controller* m_instance = nullptr;
@@ -42,8 +42,9 @@ private:
     {
         std::string_view m_progName;
         std::span<const char* const> m_positional;
-        bool m_showHelp = false;
-        bool m_wasError = false;
+        bool m_showHelp    = false;
+        bool m_readSubdirs = false;
+        bool m_wasError    = false;
 
         explicit Arguments(int argc, char* argv[]);
     } m_args;
