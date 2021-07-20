@@ -35,7 +35,7 @@ int Controller::run()
 
     if (m_args.m_showHelp)
     {
-        m_err << "Usage: " << m_args.m_progName << " [-hr] [DIRECTORY]...\n"
+        m_out << "Usage: " << m_args.m_progName << " [-hr] [DIRECTORY]...\n"
                  "Print the content of the DIRECTORY(ies).\n\n"
                  "With no DIRECTORY, use the current working directory.\n"
                  "Exit status is 0 for success, 1 for failure and 2 for"
