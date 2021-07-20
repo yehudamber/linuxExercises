@@ -25,6 +25,8 @@ public:
         };
         std::optional<ExtraData> m_extra;
         std::optional<std::string> m_linkTarget;
+
+        bool isSubdir() const;
     };
 
     explicit Directory(const std::string_view& path);

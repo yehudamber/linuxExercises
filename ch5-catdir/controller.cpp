@@ -6,14 +6,15 @@
 #include <exception>
 #include <iomanip>
 #include <ostream>
+#include <stdexcept>
+
+#include <unistd.h>
 
 using namespace std::string_view_literals;
 
 Controller::Controller(
                 int argc, char* argv[], std::ostream& out, std::ostream& err)
-    : // argv[0] is used only as the program name
-      m_progName(argv[0]), m_args(argv + 1, argc - 1),
-      m_out(out), m_err(err)
+    : m_args(argc, argv), m_out(out), m_err(err)
 {
     m_instance = this; // assume that only one controller is
                        // created at the same time
@@ -26,13 +27,31 @@ Controller::~Controller()
 
 int Controller::run()
 {
-    if (m_args.empty())
+    if (m_args.m_wasError)
+    {
+        m_err << "Try '" << m_args.m_progName << " -h' for more information.\n";
+        return ExitStatus::CMDLINEERR;
+    }
+
+    if (m_args.m_showHelp)
+    {
+        m_out << "Usage: " << m_args.m_progName << " [-hr] [DIRECTORY]...\n"
+                 "Print the content of the DIRECTORY(ies).\n\n"
+                 "With no DIRECTORY, use the current working directory.\n"
+                 "Exit status is 0 for success, 1 for failure and 2 for"
+                 " command-line error.\n\n"
+                 "  -h\tShow this help and exit\n"
+                 "  -r\tAlso print the content of subdirectories\n";
+        return ExitStatus::SUCCESS;
+    }
+
+    if (m_args.m_positional.empty())
     {
         process("."sv);
     }
     else
     {
-        for (auto path : m_args)
+        for (auto path : m_args.m_positional)
         {
             process(path);
         }
@@ -42,11 +61,11 @@ int Controller::run()
 
 std::ostream& Controller::error()
 {
-    m_instance->m_exitStatus = EXIT_FAILURE;
-    return m_instance->m_err << m_instance->m_progName << ": ";
+    m_instance->m_exitStatus = ExitStatus::FAILURE;
+    return m_instance->m_err << m_instance->m_args.m_progName << ": ";
 }
 
-void Controller::process(const std::string_view& path) try
+void Controller::process(const std::string_view& path, bool isCmdLineArg) try
 {
     constexpr auto inodeFieldWidth     = 8;
     constexpr auto linkCountFieldWidth = 3;
@@ -55,6 +74,10 @@ void Controller::process(const std::string_view& path) try
     auto dir = Directory(path);
     while (auto ent = dir.next())
     {
+        if (!isCmdLineArg)
+        {
+            m_out << '\t';
+        }
         if (ent->m_extra)
         {
             m_out << std::setw(inodeFieldWidth) << ent->m_extra->m_inode << ' '
@@ -74,6 +97,12 @@ void Controller::process(const std::string_view& path) try
             m_out << " -> " << *ent->m_linkTarget;
         }
         m_out << '\n';
+
+        if (isCmdLineArg && m_args.m_readSubdirs && ent->isSubdir()
+                && ent->m_name != "." && ent->m_name != "..")
+        {
+            process(std::string(path) + '/' + ent->m_name, false);
+        }
     }
 }
 catch (const std::exception& ex)
@@ -83,4 +112,26 @@ catch (const std::exception& ex)
 catch (...)
 {
     error() << "Unknown exception\n";
+}
+
+Controller::Arguments::Arguments(int argc, char* argv[]) : m_progName(argv[0])
+{
+    for (int opt; (opt = ::getopt(argc, argv, "hr")) != -1;)
+    {
+        switch (opt)
+        {
+        case 'h':
+            m_showHelp = true;
+            break;
+        case 'r':
+            m_readSubdirs = true;
+            break;
+        case '?':
+            m_wasError = true;
+            return;
+        default:
+            throw std::logic_error("unexpected result from getopt()");
+        }
+    }
+    m_positional = {argv + ::optind, argv + argc};
 }
