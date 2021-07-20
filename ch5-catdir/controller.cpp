@@ -65,7 +65,7 @@ std::ostream& Controller::error()
     return m_instance->m_err << m_instance->m_args.m_progName << ": ";
 }
 
-void Controller::process(const std::string_view& path, bool isArgument) try
+void Controller::process(const std::string_view& path, bool isCmdLineArg) try
 {
     constexpr auto inodeFieldWidth     = 8;
     constexpr auto linkCountFieldWidth = 3;
@@ -74,7 +74,7 @@ void Controller::process(const std::string_view& path, bool isArgument) try
     auto dir = Directory(path);
     while (auto ent = dir.next())
     {
-        if (!isArgument)
+        if (!isCmdLineArg)
         {
             m_out << '\t';
         }
@@ -98,7 +98,7 @@ void Controller::process(const std::string_view& path, bool isArgument) try
         }
         m_out << '\n';
 
-        if (isArgument && m_args.m_readSubdirs && ent->isSubdir()
+        if (isCmdLineArg && m_args.m_readSubdirs && ent->isSubdir()
                 && ent->m_name != "." && ent->m_name != "..")
         {
             process(std::string(path) + '/' + ent->m_name, false);

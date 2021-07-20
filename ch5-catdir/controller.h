@@ -33,7 +33,7 @@ public:
     static std::ostream& error();
 
 private:
-    void process(const std::string_view& path, bool isArgument = true);
+    void process(const std::string_view& path, bool isCmdLineArg = true);
 
     // static pointer to the created controller
     static inline Controller* m_instance = nullptr;
