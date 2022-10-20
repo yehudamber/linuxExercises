@@ -32,7 +32,8 @@ int main(int /*argc*/, char* argv[]) try
             throw std::system_error(savedErrno, std::generic_category(),
                                     "cannot stat a directory in the path");
         }
-        if (dotStat.st_ino == dotDotStat.st_ino) // root directory
+        if (dotStat.st_dev == dotDotStat.st_dev
+                && dotStat.st_ino == dotDotStat.st_ino) // root directory
         {
             break;
         }
@@ -44,10 +45,7 @@ int main(int /*argc*/, char* argv[]) try
             throw std::system_error(savedErrno, std::generic_category(),
                                     "cannot open a directory in the path");
         }
-        // iterate over the parent directory to find the name of the current
-        //  directory. if not found, iterate again and stat() each entry, to get
-        //  the 'inner' inode of mount points.
-        for (auto stat = false;;)
+        while (true)
         {
             errno = 0; // to distinguish end-of-directory from error
             auto ent = ::readdir(dotDotDir);
@@ -59,35 +57,17 @@ int main(int /*argc*/, char* argv[]) try
                     throw std::system_error(savedErrno, std::generic_category(),
                                             "cannot read a directory in the path");
                 }
-                if (stat)
-                {
-                    throw std::logic_error(
-                            "parent directory doesn't contain its subdirectory");
-                }
-                // iterate again and stat()
-                stat = true;
-                ::rewinddir(dotDotDir);
-                continue;
+                throw std::logic_error(
+                        "parent directory doesn't contain its subdirectory");
             }
-            if (stat)
+            struct stat entStat;
+            if (::fstatat(::dirfd(dotDotDir), ent->d_name, &entStat, 0) == 0
+                    && entStat.st_dev == dotStat.st_dev
+                    && entStat.st_ino == dotStat.st_ino)
             {
-                struct stat entStat;
-                if (::fstatat(::dirfd(dotDotDir), ent->d_name, &entStat, 0) < 0
-                        || entStat.st_ino != dotStat.st_ino
-                        || entStat.st_dev != dotStat.st_dev)
-                {
-                    continue;
-                }
+                path.push_back(ent->d_name);
+                break;
             }
-            else
-            {
-                if (ent->d_ino != dotStat.st_ino)
-                {
-                    continue;
-                }
-            }
-            path.push_back(ent->d_name);
-            break;
         }
         if (::fchdir(::dirfd(dotDotDir)) < 0)
         {
