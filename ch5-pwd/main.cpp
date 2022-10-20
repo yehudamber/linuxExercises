@@ -4,6 +4,7 @@
 
 #include <cerrno>
 #include <iostream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <system_error>
@@ -12,6 +13,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+namespace rv = std::ranges::views;
 
 int main(int /*argc*/, char* argv[]) try
 {
@@ -77,9 +80,9 @@ int main(int /*argc*/, char* argv[]) try
         }
         (void) ::closedir(dotDotDir);
     }
-    for (auto i = path.rbegin(); i != path.rend(); ++i)
+    for (const auto& dir : path | rv::reverse)
     {
-        std::cout << '/' << *i;
+        std::cout << '/' << dir;
     }
     std::cout << '\n';
 }
